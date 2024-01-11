@@ -30,7 +30,7 @@ def analiza(source_folder, destination_folder, top_n=300):
 
 def main():
     source_folder = '../data/input_images'  # Ścieżka do folderu ze zdjęciami do analizy
-    destination_folder = '../data/selected_images'  # Ścieżka do folderu docelowego
+    destination_folder = '../data/obrazy'  # Ścieżka do folderu docelowego
 
     if not os.path.exists(destination_folder):
         os.makedirs(destination_folder)
