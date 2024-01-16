@@ -9,6 +9,8 @@ Ten skrypt zawiera:
 """
 
 import torch
+import torch.nn as nn
+import torch.optim as optim
 import torchvision.models as models
 from torchvision.models import resnet18, ResNet18_Weights
 import torch.nn as nn
@@ -16,19 +18,7 @@ from torch.utils.data import DataLoader
 from custom_dataset import CustomDataset
 from torchvision import transforms
 
-
-# 1. Przetrenowany Model ResNet
-def get_pretrained_resnet(num_classes):
-    """
-    Funkcja do tworzenia przetrenowanego modelu ResNet z dostosowaną ostatnią warstwą.
-    Zwraca model ResNet dostosowany do zadanej liczby klas.
-    """
-    weights = ResNet18_Weights.DEFAULT
-    model = resnet18(weights=weights)
-    model.fc = nn.Linear(model.fc.in_features, num_classes)
-    return model
-
-# 2. Prosty Model CNN
+# 2. Nieprzetrenowany Model CNN
 class SimpleCNN(nn.Module):
     """
     Prosta konwolucyjna sieć neuronowa (CNN).
@@ -51,6 +41,16 @@ class SimpleCNN(nn.Module):
         x = nn.functional.relu(self.fc1(x))
         x = self.fc2(x)
         return x
+# 1. Przetrenowany Model ResNet
+def get_pretrained_resnet(num_classes):
+    """
+    Funkcja do tworzenia przetrenowanego modelu ResNet z dostosowaną ostatnią warstwą.
+    Zwraca model ResNet dostosowany do zadanej liczby klas.
+    """
+    weights = ResNet18_Weights.DEFAULT
+    model = resnet18(weights=weights)
+    model.fc = nn.Linear(model.fc.in_features, num_classes)
+    return model
 
 # Przykładowe użycie modeli
 num_classes = 2  # Liczba klas (samochód, brak samochodu)
@@ -68,8 +68,25 @@ transform = transforms.Compose([
 dataset = CustomDataset(images_dir='data/obrazy', labels_dir='data/etykiety', transform=transform)
 data_loader = DataLoader(dataset, batch_size=4, shuffle=True)
 
-# Pętla treningowa (przykład)
-for images, labels in data_loader:
-    # Tutaj można dodać kroki trenowania modelu
-    # Na przykład: output = model(images), obliczenie straty, backpropagation
-    pass
+# Definiowanie funkcji straty i optymalizatora
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(pretrained_resnet.parameters(), lr=0.001)
+
+# Pętla treningowa 
+num_epochs = 5
+for epoch in range(num_epochs):
+    running_loss = 0.0
+    for images, labels in data_loader:
+        # Zerowanie gradientów
+        optimizer.zero_grad()
+
+        # Przekazywanie danych do modelu
+        outputs = pretrained_resnet(images)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+
+        # Obliczanie straty
+        running_loss += loss.item()
+    print(f"Epoka {epoch + 1} - średnia strata: {running_loss / len(data_loader)}")
+print('Trenowanie zakończone')
