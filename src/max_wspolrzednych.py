@@ -1,22 +1,22 @@
-import os
 import json
+import os
 
-folder_etykiet = '../data/etykiety'  
-
-def max_ilosc_wspolrzednych(folder):
-    max = 0
-    plik = None
-    for nazwa_pliku in os.listdir(folder):
+def znajdz_maksymalna_liczbe_etykiet(folder_etykiet):
+    maksymalna_liczba = 0
+    nazwa = ""
+    for nazwa_pliku in os.listdir(folder_etykiet):
         if nazwa_pliku.endswith(".json"):
-            sciezka_pliku = os.path.join(folder, nazwa_pliku)
+            sciezka_pliku = os.path.join(folder_etykiet, nazwa_pliku)
             with open(sciezka_pliku, 'r') as plik:
-                dane = json.load(plik)
-                temp = len(dane)
-                if temp > max:
-                    max = temp
-                    plik = nazwa_pliku
-    
-    print(f'Najwięcej współrzędnych ma plik: {plik} - {max} współrzędnych')
+                etykiety = json.load(plik)
+                liczba_etykiet = len(etykiety)
+                if liczba_etykiet > maksymalna_liczba:
+                    maksymalna_liczba = liczba_etykiet
+                    nazwa = nazwa_pliku
+    return maksymalna_liczba, nazwa
 
-max_ilosc_wspolrzednych(folder_etykiet)
-    
+# Użyj funkcji do znalezienia maksymalnej liczby etykiet w folderze etykiet
+folder_etykiet = '../data/etykiety'  # Zmień na właściwą ścieżkę
+maks_etykiet = znajdz_maksymalna_liczbe_etykiet(folder_etykiet)
+print("Maksymalna liczba etykiet: ", maks_etykiet[0])
+print("Nazwa pliku z maksymalną liczbą etykiet: ", maks_etykiet[1])
