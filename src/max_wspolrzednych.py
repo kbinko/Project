@@ -1,3 +1,5 @@
+# Skrypt sprawdzający maksymalną liczbę współrzędnych w plikach z etykietami, zwracający maksymalną liczbę współrzędnych i odpowiadającą nazwą pliku.
+
 import json
 import os
 

@@ -1,3 +1,7 @@
+# Po uruchomieniu pierwszej wersji skryptu aktualizującego etykiety, program zagnieździł etykiety same w sobie w taki sposób:
+# [{nazwa: 'samochod', wspolrzedne: [{nazwa: 'samochod', wspolrzedne: [wspolrzedne]}]}] 
+# Ten skrypt został napisany w celu naprawienia tego błędu.
+
 import json
 import os
 
@@ -21,10 +25,9 @@ def napraw_etykiety(folder_etykiet):
                             aktualna_etykieta = aktualna_etykieta['wspolrzedne']
                         poprawione_dane.append({"nazwa": "samochod", "wspolrzedne": aktualna_etykieta['wspolrzedne']})
 
-            # Zapisanie poprawionych danych
+            
             with open(sciezka_pliku, 'w') as plik:
                 json.dump(poprawione_dane, plik)
 
-# Ścieżka do folderu z etykietami
-folder_etykiet = '../data/etykiety'  # Zmień na właściwą ścieżkę
+folder_etykiet = '../data/etykiety'  
 napraw_etykiety(folder_etykiet)

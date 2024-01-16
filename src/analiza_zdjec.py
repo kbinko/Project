@@ -1,3 +1,5 @@
+# Z racji sporej ilości zdjęc do wyboru, napisaliśmy prosty program do analizy zdjęć i wybrania 300 najlepszych.
+
 import os
 import shutil
 from utils import load_image, ocena_jakosci

@@ -1,3 +1,6 @@
+# Skrypt do aktualizacji etykiet, przy tworzeniu programu do etykietowania sposób zapisu etykiet był inny niż wymagany, 
+# co niestety zwróciło naszą uwagę dopiero po zakończeniu etykietowania.
+
 import json
 import os
 
@@ -18,16 +21,3 @@ def aktualizuj_pliki_json(folder, start, stop):
 
 folder_etykiet = '../data/etykiety'  # Zastąp ścieżką do folderu zawierającego pliki JSON
 aktualizuj_pliki_json(folder_etykiet, 151, 300)
-
-def max_wspolrzedne(folder):
-    maksimum = 0
-    for nazwa_pliku in os.listdir(folder):
-        if nazwa_pliku.endswith(".json"):
-            sciezka_pliku = os.path.join(folder, nazwa_pliku)
-            with open(sciezka_pliku, 'r') as plik:
-                dane = json.load(plik)
-                for element in dane:
-                    maksimum = max(maksimum, max(element['wspolrzedne']))
-    return maksimum
-
-max_wspolrzedne(folder_etykiet)

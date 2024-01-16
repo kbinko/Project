@@ -1,3 +1,10 @@
+# Nasz własny program do etykietowania stworzony w Pythonie z wykorzystaniem biblioteki Tkinter
+# Biblioteka Tkinter została użyta do stworzenia interfejsu graficznego użytkownika (GUI)
+# Biblioteka PIL (Python Imaging Library) została użyta do wczytywania obrazów
+# Program ten pozwala na wczytanie wielu obrazów naraz, zachowując ich kolejność i informuje użytkownika o tym, które zdjęcie jest obecnie wyświetlane i ile zostało
+# Użytkownik może zaznaczyć prostokąty na obrazie, które reprezentują dany obiekt. Program potwierdza w konsoli, że prostokąt został dodany i zapisuje współrzędne prostokąta w liście
+# Gdy użytkownik przejdzie do następnego zdjęcia, program zapisuje listę współrzędnych do pliku JSON o tej samej nazwie co zdjęcie, ale z rozszerzeniem .json
+
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
@@ -9,7 +16,7 @@ class AplikacjaEtykietowania:
         self.root = root
         self.root.title("Narzędzie do Etykietowania Samochodów")
 
-        self.MAX_IMAGE_SIZE = (1400, 1000) # Maksymalny rozmiar obrazu
+        self.MAX_IMAGE_SIZE = (1400, 1000) # Maksymalny rozmiar obrazu, można zmienić zależnie od preferencji użytkownika
 
         self.canvas = tk.Canvas(root, cursor="cross")
         self.canvas.pack(fill="both", expand=True)
