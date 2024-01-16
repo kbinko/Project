@@ -49,7 +49,7 @@ def get_pretrained_resnet(num_classes):
     """
     weights = ResNet18_Weights.DEFAULT
     model = resnet18(weights=weights)
-    model.fc = nn.Linear(model.fc.in_features, num_classes)
+    model.fc = nn.Linear(model.fc.in_features, 1)
     return model
 
 # Przykładowe użycie modeli
@@ -69,24 +69,25 @@ dataset = CustomDataset(images_dir='data/obrazy', labels_dir='data/etykiety', tr
 data_loader = DataLoader(dataset, batch_size=4, shuffle=True)
 
 # Definiowanie funkcji straty i optymalizatora
-criterion = nn.CrossEntropyLoss()
+criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(pretrained_resnet.parameters(), lr=0.001)
 
-# Pętla treningowa 
+
+# Pętla treningowa
 num_epochs = 5
 for epoch in range(num_epochs):
     running_loss = 0.0
     for images, labels in data_loader:
-        # Zerowanie gradientów
-        optimizer.zero_grad()
+        labels = labels.type(torch.FloatTensor).unsqueeze(1)  # Konwersja etykiet i dodanie wymiaru
 
-        # Przekazywanie danych do modelu
+        optimizer.zero_grad()
         outputs = pretrained_resnet(images)
         loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
 
-        # Obliczanie straty
         running_loss += loss.item()
+
     print(f"Epoka {epoch + 1} - średnia strata: {running_loss / len(data_loader)}")
-print('Trenowanie zakończone')
+
+print('Trening zakończony')

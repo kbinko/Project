@@ -41,11 +41,9 @@ class CustomDataset(Dataset):
         label_path = os.path.join(self.labels_dir, label_name)
 
         if os.path.exists(label_path):
-            with open(label_path, 'r') as file:
-                label_data = json.load(file)
-                label = self.process_label(label_data)
+            label = 1
         else:
-            label = torch.zeros((16, 4))  # Jeśli nie ma etykiety, wypełnia zerami
+            label = 0
 
         # Przekształcenia obrazu
         if self.transform:
@@ -59,6 +57,8 @@ class CustomDataset(Dataset):
         listy słowników, gdzie każdy słownik zawiera klucz 'wspolrzedne' z listą wartości.
         Jako że tensory muszą mieć stały rozmiar, ustawiliśmy go na 16 - tyle najwięcej obiektów jest w jednej z etykiet (zdjecie_15.json)
         Jeśli etykieta ma mniej niż 16 obiektów, to zostanie uzupełniona zerami.
+        Narazie jest niepotrzebna, stworzona została w momencie, w którym polecenie było niezrozumiałe.
+        Zostawiam w razie potrzeby.
 
         Zwraca Tensor PyTorch zawierający współrzędne.
         """
