@@ -1,0 +1,6 @@
+// dodanie folderu scr do ścieżki importowania
+{
+    "python.analysis.extraPaths": [
+        "./scr"
+    ]
+}

@@ -1,18 +1,30 @@
-from PIL import Image
+# plik z przydatnymi funkcjami używanymi w innych plikach
+
 import numpy as np
+import os
+import json
+from PIL import Image
 
 def load_image(image_path):
     """
-    Pobiera obraz z podanej ścieżki i zwraca jego kopię.
+    Funkcja do wczytywania obrazu z dysku.
+
+    Zwraca obiekt obrazu PIL skonwertowany do formatu RGB - ponieważ Pytorch oczekuje obrazów w tym formacie.
     """
-    try:
-        img = Image.open(image_path)
-        img_copy = img.copy()  # Tworzenie kopii obrazu
-        img.close()  # Zamknięcie oryginalnego obrazu
-        return img_copy
-    except IOError:
-        print(f"Błąd podczas ładowania obrazu: {image_path}")
-        return None
+    return Image.open(image_path).convert('RGB')
+
+def load_label(label_path):
+    """
+    Funkcja do wczytywania etykiet z pliku JSON.
+
+    Zwraca dane etykiety w formacie JSON (lista słowników).
+    """
+    if os.path.exists(label_path):
+        with open(label_path, 'r') as file:
+            return json.load(file)
+    else:
+        return []  # Pusta lista, jeśli plik z etykietami nie istnieje
+
 
 def ocena_jakosci(image):
     """
