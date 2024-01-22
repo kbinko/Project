@@ -45,13 +45,28 @@ num_ftrs = model_densenet.classifier.in_features
 model_densenet.classifier = nn.Linear(num_ftrs, 1)
 
 # Załadowanie danych 
+
+# Augmentacja danych dla zbioru treningowego
+train_transforms = transforms.Compose([
+    transforms.Resize((256, 256)),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomRotation(10),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2),
+    transforms.RandomCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
+# Transformacja dla zbiorów walidacyjnego i testowego
 transform = transforms.Compose([    
-    transforms.Resize(256),   #obraz 256x256     
+    transforms.Resize((256, 256)),   #obraz 256x256     
+    transforms.CenterCrop(224), #wybór centralnej części obrazu o rozmiarze 224x224
     transforms.ToTensor(), #konwersja obrazu do formatu tensora             
     transforms.Normalize(              
     mean=[0.485, 0.456, 0.406],        
     std=[0.229, 0.224, 0.225] # normalizacja obrazu na podstawie średniej i odchylenia standardowego          
  )])
+
 dataset = CustomDataset('data/obrazy', 'data/etykiety', transform=transform)
 
 # Podział danych na treningowe i walidacyjne
@@ -60,9 +75,10 @@ val_size = int(0.1 * len(dataset))
 test_size = len(dataset) - train_size - val_size
 train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
 
-train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=4, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=4, shuffle=True)
+train_dataset.dataset.transform = train_transforms
+train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=16, shuffle=True)
 
 def test_model(model, test_loader):
     model.eval()
@@ -82,9 +98,9 @@ def test_model(model, test_loader):
             true_labels.extend(labels.tolist())
 
     accuracy = 100 * correct / total
-    precision = precision_score(true_labels, predicted_labels)
-    recall = recall_score(true_labels, predicted_labels)
-    f1 = f1_score(true_labels, predicted_labels)
+    precision = precision_score(true_labels, predicted_labels, zero_division=0)
+    recall = recall_score(true_labels, predicted_labels, zero_division=0)
+    f1 = f1_score(true_labels, predicted_labels, zero_division=0)
 
     return accuracy, precision, recall, f1
 
@@ -93,23 +109,27 @@ class SimpleCNN(nn.Module):
     def __init__(self):
         super(SimpleCNN, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
+        self.bn1 = nn.BatchNorm2d(32)  # Dodano Batch Normalization
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)  # Dodano drugą warstwę konwolucyjną
+        self.bn2 = nn.BatchNorm2d(64)  # Dodano Batch Normalization
         self.dropout = nn.Dropout(0.5)
-        self.fc1 = nn.Linear(32 * 128 * 128, 128) 
-        self.fc2 = nn.Linear(128, 1)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.fc1 = nn.Linear(64 * 56 * 56, 512)  # Zmieniono rozmiar wejścia
+        self.fc2 = nn.Linear(512, 1)
 
     def forward(self, x):
-        x = nn.functional.relu(self.conv1(x))
-        x = nn.functional.max_pool2d(x, 2)
-        x = x.view(x.size(0), -1)  # Spłaszczanie tensora
+        x = self.pool(nn.functional.relu(self.bn1(self.conv1(x))))
+        x = self.pool(nn.functional.relu(self.bn2(self.conv2(x))))  # Dodano warstwę i Batch Normalization
+        x = x.view(x.size(0), -1)
         x = self.dropout(x)
-        x = nn.functional.relu(self.fc1(x.view(x.size(0), -1)))
+        x = nn.functional.relu(self.fc1(x))
         x = self.fc2(x)
         return x
     
 # Inicjalizacja modelu, funkcji straty i optymalizatora
 model = SimpleCNN()
 criterion = nn.BCEWithLogitsLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.Adam(model.parameters(), lr=0.0005)
 
 # Pętla treningowa
 """
@@ -137,8 +157,8 @@ for epoch in range(num_epochs):
     print(f"Epoka {epoch+1}, Strata treningowa: {(running_loss / len(train_loader)):.4f}, Strata walidacyjna: {(val_loss / len(val_loader)):.4f}")
 
 print("Trening zakończony")
-"""
 
+"""
 models_list = [model_resnet50, model_alexnet, model_vgg16, model_squeezenet, model_densenet, model]
 for model in models_list:
     accuracy, precision, recall, f1 = test_model(model, test_loader)
