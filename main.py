@@ -121,7 +121,7 @@ optimizer = optim.Adam(model.parameters(), lr=0.0005)
 
 # Pętla treningowa
 
-"""
+
 dokladnosc_cnn = []
 
 num_epochs = 10
@@ -157,7 +157,6 @@ plt.xlabel("Epoka")
 plt.ylabel("Dokładność")
 plt.plot(range(1, num_epochs+1), dokladnosc_cnn)
 plt.show()
-"""
 
 
 
