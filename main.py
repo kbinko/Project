@@ -1,12 +1,3 @@
-"""
-Główny plik projektu do trenowania modeli klasyfikacji obrazów.
-
-Ten skrypt zawiera:
-1. Definicje dwóch modeli: przetrenowanego modelu ResNet i prostego modelu CNN.
-2. Przykładową pętlę treningową dla tych modeli.
-3. Funkcje do wczytywania i przetwarzania danych z wykorzystaniem klasy CustomDataset.
-
-"""
 
 import torch
 import torch.nn as nn
@@ -15,7 +6,7 @@ from torch.utils.data import DataLoader, random_split
 from torchvision import models, transforms
 from custom_dataset import CustomDataset
 from torchvision.models import resnet50, ResNet50_Weights, alexnet, AlexNet_Weights, vgg16, VGG16_Weights, squeezenet1_0, SqueezeNet1_0_Weights, densenet161, DenseNet161_Weights
-from sklearn.metrics import precision_score, recall_score, f1_score
+import matplotlib.pyplot as plt
 
 #Załadowanie przetrenowanych modeli
 
@@ -70,15 +61,15 @@ transform = transforms.Compose([
 dataset = CustomDataset('data/obrazy', 'data/etykiety', transform=transform)
 
 # Podział danych na treningowe i walidacyjne
-train_size = int(0.65 * len(dataset))
-val_size = int(0.1 * len(dataset))
+train_size = int(0.75 * len(dataset))
+val_size = int(0.15 * len(dataset))
 test_size = len(dataset) - train_size - val_size
 train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
 
 train_dataset.dataset.transform = train_transforms
-train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=16, shuffle=True)
+train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=8, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=8, shuffle=True)
 
 def test_model(model, test_loader):
     model.eval()
@@ -98,11 +89,8 @@ def test_model(model, test_loader):
             true_labels.extend(labels.tolist())
 
     accuracy = 100 * correct / total
-    precision = precision_score(true_labels, predicted_labels, zero_division=0)
-    recall = recall_score(true_labels, predicted_labels, zero_division=0)
-    f1 = f1_score(true_labels, predicted_labels, zero_division=0)
 
-    return accuracy, precision, recall, f1
+    return accuracy
 
 # Trening własnego modelu
 class SimpleCNN(nn.Module):
@@ -132,7 +120,10 @@ criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.0005)
 
 # Pętla treningowa
+
 """
+dokladnosc_cnn = []
+
 num_epochs = 10
 for epoch in range(num_epochs):
     model.train()
@@ -153,17 +144,39 @@ for epoch in range(num_epochs):
             outputs = model(images)
             loss = criterion(outputs, labels)
             val_loss += loss.item()
-
-    print(f"Epoka {epoch+1}, Strata treningowa: {(running_loss / len(train_loader)):.4f}, Strata walidacyjna: {(val_loss / len(val_loader)):.4f}")
+    # Dokładność
+    accuracy = test_model(model, val_loader)
+    dokladnosc_cnn.append(accuracy)
+    print(f"Epoka {epoch+1}, Strata treningowa: {(running_loss / len(train_loader)):.4f}, Strata walidacyjna: {(val_loss / len(val_loader)):.4f}, Dokładność: {(accuracy):.2f}%")
 
 print("Trening zakończony")
 
+plt.figure(figsize=(10, 5))
+plt.title("Dokładność SimpleCNN na poszczególnych epokach")
+plt.xlabel("Epoka")
+plt.ylabel("Dokładność")
+plt.plot(range(1, num_epochs+1), dokladnosc_cnn)
+plt.show()
 """
+
+
+
+
 models_list = [model_resnet50, model_alexnet, model_vgg16, model_squeezenet, model_densenet, model]
+dokladnosc = []
 for model in models_list:
-    accuracy, precision, recall, f1 = test_model(model, test_loader)
+    accuracy = test_model(model, test_loader)
+    dokladnosc.append(accuracy)
     print(f"Model: {model.__class__.__name__}")
     print(f"Dokładność: {(accuracy):.2f}%")
-    print(f"Precyzja: {(precision):.2f}")
-    print(f"Czułość: {(recall):.2f}")
-    print(f"Miara F1: {(f1):.2f}")
+
+print(dokladnosc)
+
+# Wykres dokładności modeli na zbiorze testowym 
+plt.figure(figsize=(10, 5))
+plt.title("Dokładność modeli na zbiorze testowym")
+plt.xlabel("Model")
+plt.ylabel("Dokładność")
+plt.bar(["ResNet50", "AlexNet", "VGG16", "SqueezeNet", "DenseNet", "SimpleCNN"], dokladnosc)
+plt.show()
+
