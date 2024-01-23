@@ -9,7 +9,7 @@ class CustomDataset(Dataset):
     """
     Klasa CustomDataset służy do efektywnego wczytywania i przetwarzania zbioru danych 
     zawierającego obrazy i odpowiadające im etykiety, specyficzne dla potrzeb projektu. 
-    Ta klasa jest kluczowa dla projektu, ponieważ standardowe klasy Dataset w Pytorch 
+    Jest ona kluczowa dla projektu, ponieważ standardowe klasy Dataset w Pytorch 
     nie są dostosowane do specyficznych formatów i wymagań, takich jak obsługa plików JSON 
     z etykietami i przetwarzanie obrazów w określony sposób. CustomDataset umożliwia 
     dostosowanie procesu wczytywania danych, co jest istotne dla efektywnego trenowania modeli 

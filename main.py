@@ -176,7 +176,7 @@ print(dokladnosc)
 plt.figure(figsize=(10, 5))
 plt.title("Dokładność modeli na zbiorze testowym")
 plt.xlabel("Model")
-plt.ylabel("Dokładność")
+plt.ylabel("Dokładność") 
 plt.bar(["ResNet50", "AlexNet", "VGG16", "SqueezeNet", "DenseNet", "SimpleCNN"], dokladnosc)
 plt.show()
 
